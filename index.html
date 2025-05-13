@@ -84,6 +84,7 @@
       opacity: 0;
       transform: scale(0.9);
       pointer-events: none;
+      user-select: none;
     }
 
     .card.visible {
@@ -104,6 +105,11 @@
       object-fit: fill;
       border-radius: 0.5rem;
       margin-bottom: 1rem;
+      pointer-events: none;
+    }
+
+    .card img::selection {
+      background: none;
     }
 
     .card h3 {
@@ -164,6 +170,27 @@
       background-color: #00ffd2;
       border-radius: 10px;
     }
+
+    .pagination {
+      text-align: center;
+      margin: 2rem auto;
+    }
+
+    .pagination button {
+      background: #333;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: 1px solid #555;
+      margin: 0 0.2rem;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .pagination button.active {
+      background: #00ffd2;
+      color: black;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -177,38 +204,76 @@
   <h2 class="section-heading">All Videos</h2><br><br>
 </div>
 
-<section class="grid" id="postGrid">
-  <!-- Posts will be loaded dynamically here -->
-</section>
+<section class="grid" id="postGrid"></section>
+<div class="pagination" id="pagination"></div>
 
 <div class="footer">
   &copy; 2025 ONLY FANS. All rights reserved.
 </div>
 
 <script>
-  const sheetyUrl = 'https://api.sheety.co/f7e8ecb9a5d1c0da1cce9028b0eaa36b/alpha/sheet1';
+  const sheetID = '1pH8xTXO4OrPRo-Esr1QrMp43KeVTslCvIsKJbmHopSs';
+  const sheetName = 'Sheet1';
+  const query = encodeURIComponent('SELECT A, B, C');
+  const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?sheet=${sheetName}&tq=${query}`;
+  const postsPerPage = 10;
+  let allPosts = [];
 
-  fetch(sheetyUrl)
-    .then(res => res.json())
-    .then(data => {
-      const posts = data.sheet1; // adjust if your key is different
-      const grid = document.getElementById('postGrid');
-
-      posts.forEach(post => {
-        const card = document.createElement('div');
-        card.className = 'card visible';
-        card.setAttribute('data-post-id', `post-${post.id}`);
-        card.innerHTML = `
-          <img src="${post.imageUrl}" alt="${post.title}" />
-          <h3>${post.title}</h3>
-          <button onclick="window.open('${post.watchUrl}', '_blank')">Watch</button>
-        `;
-        grid.appendChild(card);
-      });
-
-      // Re-run view tracking after dynamic load
-      setupViewTracking();
+  fetch(url)
+    .then(res => res.text())
+    .then(rep => {
+      const json = JSON.parse(rep.substring(47).slice(0, -2));
+      const data = json.table.rows;
+      allPosts = data.map((row, index) => ({
+        id: `post-${index}`,
+        title: row.c[0]?.v || 'Untitled',
+        imageUrl: row.c[1]?.v || '',
+        watchUrl: row.c[2]?.v || '#'
+      }));
+      renderPagination();
+      renderPosts(1);
     });
+
+  function renderPosts(page) {
+    const grid = document.getElementById('postGrid');
+    grid.innerHTML = '';
+    const start = (page - 1) * postsPerPage;
+    const end = start + postsPerPage;
+    const pagePosts = allPosts.slice(start, end);
+
+    pagePosts.forEach(post => {
+      const card = document.createElement('div');
+      card.className = 'card visible';
+      card.setAttribute('data-post-id', post.id);
+      card.innerHTML = `
+        <img src="${post.imageUrl}" alt="${post.title}" oncontextmenu="return false;" draggable="false"/>
+        <h3>${post.title}</h3>
+        <button onclick="window.open('${post.watchUrl}', '_blank')">Watch</button>
+      `;
+      grid.appendChild(card);
+    });
+
+    setupViewTracking();
+    updateCardVisibility();
+  }
+
+  function renderPagination() {
+    const pagination = document.getElementById('pagination');
+    const totalPages = Math.ceil(allPosts.length / postsPerPage);
+    pagination.innerHTML = '';
+
+    for (let i = 1; i <= totalPages; i++) {
+      const btn = document.createElement('button');
+      btn.textContent = i;
+      btn.addEventListener('click', () => {
+        renderPosts(i);
+        document.querySelectorAll('.pagination button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+      if (i === 1) btn.classList.add('active');
+      pagination.appendChild(btn);
+    }
+  }
 
   function setupViewTracking() {
     document.querySelectorAll('.card').forEach(card => {
