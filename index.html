@@ -7,7 +7,9 @@
   <title>Only Fans</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    * {
+    /* Styles omitted here to save space — your original CSS remains exactly the same */
+    /* You can paste your full <style> section from the original code here without any changes */
+ * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -57,14 +59,29 @@
       margin-left: 0.4rem;
     }
 
-    .section-wrapper {
+    .video-section {
       text-align: center;
-      margin: 2.5rem 0 1.5rem;
+      margin-top: 2rem;
     }
 
-    .section-title {
-      font-size: 2.3rem;
-      color: #c084fc;
+    .section-heading {
+      text-align: center;
+      font-size: 2.5rem;
+      color: white;
+      font-weight: bold;
+      position: relative;
+      display: inline-block;
+      margin: 2rem auto 1rem;
+    }
+
+    .section-heading::after {
+      content: "";
+      display: block;
+      height: 5px;
+      width: 60%;
+      margin: 0.5rem auto 0;
+      background-color: #00ffd2;
+      border-radius: 10px;
     }
 
     .grid {
@@ -134,41 +151,11 @@
       background: linear-gradient(to right, #00ffd2, #00ffd2);
     }
 
-    .card .view-counter {
-      display: block;
-      margin-top: 0.5rem;
-    }
-
     .footer {
       text-align: center;
       color: #aaa;
       margin: 4rem 1rem 2rem;
       font-size: 0.9rem;
-    }
-
-    .video-section {
-      text-align: center;
-      margin-top: 2rem;
-    }
-
-    .section-heading {
-      text-align: center;
-      font-size: 2.5rem;
-      color: white;
-      font-weight: bold;
-      position: relative;
-      display: inline-block;
-      margin: 2rem auto 1rem;
-    }
-
-    .section-heading::after {
-      content: "";
-      display: block;
-      height: 5px;
-      width: 60%;
-      margin: 0.5rem auto 0;
-      background-color: #00ffd2;
-      border-radius: 10px;
     }
 
     .pagination {
@@ -190,6 +177,44 @@
       background: #00ffd2;
       color: black;
       font-weight: bold;
+    }
+
+    .skeleton {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      text-align: center;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    .skeleton .img {
+      width: 100%;
+      height: 180px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .skeleton .title {
+      height: 20px;
+      width: 80%;
+      background: rgba(255,255,255,0.1);
+      margin: 0 auto 1rem;
+      border-radius: 0.4rem;
+    }
+
+    .skeleton .button {
+      height: 40px;
+      width: 100%;
+      background: rgba(255,255,255,0.1);
+      border-radius: 0.5rem;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
     }
   </style>
 </head>
@@ -219,6 +244,13 @@
   const postsPerPage = 10;
   let allPosts = [];
 
+  function getCookie(name) {
+    const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+    return v ? v[2] : null;
+  }
+
+  showSkeletons();
+
   fetch(url)
     .then(res => res.text())
     .then(rep => {
@@ -230,9 +262,30 @@
         imageUrl: row.c[1]?.v || '',
         watchUrl: row.c[2]?.v || '#'
       }));
-      renderPagination();
-      renderPosts(1);
+      setTimeout(() => {
+        removeSkeletons();
+        renderPagination();
+        renderPosts(1);
+      }, 3000);
     });
+
+  function showSkeletons() {
+    const grid = document.getElementById('postGrid');
+    for (let i = 0; i < postsPerPage; i++) {
+      const skeleton = document.createElement('div');
+      skeleton.className = 'skeleton';
+      skeleton.innerHTML = `
+        <div class="img"></div>
+        <div class="title"></div>
+        <div class="button"></div>
+      `;
+      grid.appendChild(skeleton);
+    }
+  }
+
+  function removeSkeletons() {
+    document.getElementById('postGrid').innerHTML = '';
+  }
 
   function renderPosts(page) {
     const grid = document.getElementById('postGrid');
@@ -248,13 +301,22 @@
       card.innerHTML = `
         <img src="${post.imageUrl}" alt="${post.title}" oncontextmenu="return false;" draggable="false"/>
         <h3>${post.title}</h3>
-        <button onclick="window.open('${post.watchUrl}', '_blank')">Watch</button>
+        <button onclick="handleWatchClick('${encodeURIComponent(post.watchUrl)}', '${encodeURIComponent(post.title)}')">Watch</button>
       `;
       grid.appendChild(card);
     });
 
-    setupViewTracking();
     updateCardVisibility();
+  }
+
+  // Updated handleWatchClick with title
+  function handleWatchClick(encodedUrl, encodedTitle) {
+    const verified = getCookie('verified_access');
+    if (verified === 'true') {
+      window.open(`stream.html?url=${encodedUrl}&title=${encodedTitle}`, '_blank');
+    } else {
+      window.location.href = `verify.html?url=${encodedUrl}&title=${encodedTitle}`;
+    }
   }
 
   function renderPagination() {
@@ -273,31 +335,6 @@
       if (i === 1) btn.classList.add('active');
       pagination.appendChild(btn);
     }
-  }
-
-  function setupViewTracking() {
-    document.querySelectorAll('.card').forEach(card => {
-      const postId = card.getAttribute('data-post-id');
-      const button = card.querySelector('button');
-      const counterSpan = card.querySelector('.view-counter');
-
-      let stored = JSON.parse(localStorage.getItem(`view_${postId}`)) || {};
-      let now = Date.now();
-      let viewCount = stored.count || 0;
-
-      counterSpan.textContent = `Views: ${viewCount}`;
-
-      button.addEventListener('click', () => {
-        if (!stored.timestamp || now - stored.timestamp > 24 * 60 * 60 * 1000) {
-          viewCount++;
-          counterSpan.textContent = `Views: ${viewCount}`;
-          localStorage.setItem(`view_${postId}`, JSON.stringify({
-            count: viewCount,
-            timestamp: now
-          }));
-        }
-      });
-    });
   }
 
   const canvas = document.getElementById('particles-bg');
@@ -377,6 +414,5 @@
   window.addEventListener('resize', updateCardVisibility);
   updateCardVisibility();
 </script>
-
 </body>
 </html>
