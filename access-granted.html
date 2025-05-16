@@ -33,10 +33,16 @@
     const expiresAt = Date.now() + (24 * 60 * 60 * 1000);
     localStorage.setItem('verifiedUntil', expiresAt);
 
-    // Get the redirect target from the query string
+    // Get URL and title from query params
     const params = new URLSearchParams(window.location.search);
-    const rawTarget = params.get('url') || '/';
-const target = `/stream.html?url=${encodeURIComponent(rawTarget)}`;
+    const rawUrl = params.get('url') || '';
+    const title = params.get('title');
+
+    // Build redirect target
+    let target = `/stream.html?url=${encodeURIComponent(rawUrl)}`;
+    if (title) {
+      target += `&title=${encodeURIComponent(title)}`;
+    }
 
     // Redirect after short delay
     setTimeout(() => {
