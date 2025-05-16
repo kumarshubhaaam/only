@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -6,7 +7,7 @@
   <title>Stream</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-        * {
+    * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -157,26 +158,27 @@
       font-size: 0.9rem;
     }
     .button-wrapper {
-  text-align: center;
-  margin-top: 1rem;
-}
+      text-align: center;
+      margin-top: 1rem;
+    }
 
-.back-home-btn {
-  background: #ff4c4c;
-  color: white;
-  padding: 10px 24px;
-  border: none;
-  border-radius: 50px;
-  font-size: 1rem;
-  font-weight: bold;
-  text-decoration: none;
-  box-shadow: 0 0 10px rgba(255, 76, 76, 0.5);
-  transition: background 0.3s ease;
-}
+    .back-home-btn {
+      background: #ff4c4c;
+      color: white;
+      padding: 10px 24px;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: bold;
+      text-decoration: none;
+      box-shadow: 0 0 10px rgba(255, 76, 76, 0.5);
+      transition: background 0.3s ease;
+    }
 
-.back-home-btn:hover {
-  background: #e60000;
-}
+    .back-home-btn:hover {
+      background: #e60000;
+    }
+
     .verify-lock {
       text-align: center;
       margin: 2rem auto;
@@ -203,36 +205,50 @@
   </style>
 </head>
 <body>
-<canvas id="particles-bg"></canvas><header>
+<canvas id="particles-bg"></canvas>
+<header>
   <div class="logo"><span>ONLY</span> <span>FANS</span></div>
 </header>
 <br>
 <div class="button-wrapper">
   <a href="index.html" class="back-home-btn">Back</a>
-</div><div id="verificationLock" class="verify-lock" style="display: none;">
+</div>
+
+<div id="verificationLock" class="verify-lock" style="display: none;">
   <h2>Verification Required</h2>
   <p>Please verify once to unlock access to all videos for the next 24 hours.</p>
   <button class="verify-btn" onclick="startVerification()">Verify Now</button>
-</div><div class="card" id="streamCard" style="display: none;">
+</div>
+
+<div class="card" id="streamCard" style="display: none;">
   <div class="title" id="videoTitle">Streaming...</div>
   <div id="loader" class="loading"><div class="spinner"></div></div>
   <div class="iframe-container" id="videoContainer" style="display: none;">
     <iframe id="videoPlayer" allowfullscreen></iframe>
   </div>
-</div><div class="footer">
+</div>
+
+<div class="footer">
   &copy; 2025 ONLY FANS. All rights reserved.
-</div><script>
+</div>
+
+<script>
   const urlParams = new URLSearchParams(window.location.search);
   const streamUrl = urlParams.get('url');
   const title = urlParams.get('title') || "Streaming...";
 
-  const isVerified = localStorage.getItem("verified") === "true";
+  // Check verification time (24 hours)
+  const verifiedUntil = parseInt(localStorage.getItem('verifiedUntil') || '0', 10);
+  const now = Date.now();
+
   const streamCard = document.getElementById("streamCard");
   const verificationLock = document.getElementById("verificationLock");
 
-  if (isVerified) {
+  if (verifiedUntil > now) {
+    // Verified and still valid
     showStream();
   } else {
+    // Not verified or expired
     verificationLock.style.display = "block";
   }
 
@@ -242,37 +258,39 @@
     document.getElementById("videoTitle").innerText = decodeURIComponent(title);
 
     if (!streamUrl) {
-      document.getElementById('loader').innerHTML = "No video URL provided.";
-    } else {
-      const iframe = document.getElementById('videoPlayer');
-      iframe.src = streamUrl;
-
-      iframe.onload = () => {
-        document.getElementById('loader').style.display = 'none';
-        document.getElementById('videoContainer').style.display = 'block';
-      };
+      document.getElementById('loader').innerText = "No video URL provided.";
+      return;
     }
+
+    const iframe = document.getElementById('videoPlayer');
+    iframe.src = streamUrl;
+
+    iframe.onload = () => {
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('videoContainer').style.display = 'block';
+    };
   }
 
   function startVerification() {
-    const longUrl = encodeURIComponent(window.location.href);
+    // Generate shortlink to redirect user to verify.html with current page as redirect url
+    const currentUrl = encodeURIComponent(window.location.href);
     const apiToken = '5fb415cd7e6b42fd8ba25416066c25f44c85587b';
-    const apiUrl = `https://linkshortify.com/api?api=${apiToken}&url=${longUrl}`;
+    const apiUrl = `https://linkshortify.com/api?api=${apiToken}&url=${currentUrl}`;
 
     fetch(apiUrl)
       .then(res => res.json())
       .then(result => {
         if (result.status === 'error') {
           alert(result.message);
-        } else {
-          localStorage.setItem("verified", "true");
-          window.location.href = result.shortenedUrl;
+          return;
         }
+        window.location.href = result.shortenedUrl;
       })
       .catch(() => alert("Failed to generate ad link."));
   }
 
-  // Particle background (unchanged)
+  // Particle background animation
+
   const canvas = document.getElementById('particles-bg');
   const ctx = canvas.getContext('2d');
   let particles = [];
@@ -281,7 +299,6 @@
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
   }
-
   window.addEventListener('resize', resize);
   resize();
 
@@ -289,29 +306,27 @@
     constructor() {
       this.x = Math.random() * canvas.width;
       this.y = Math.random() * canvas.height;
-      this.radius = Math.random() * 2;
-      this.speedX = (Math.random() - 0.5) * 0.7;
-      this.speedY = (Math.random() - 0.5) * 0.7;
+      this.size = Math.random() * 2 + 1;
+      this.speedX = Math.random() * 1 - 0.5;
+      this.speedY = Math.random() * 1 - 0.5;
     }
-
-    draw() {
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = 'white';
-      ctx.fill();
-    }
-
     update() {
       this.x += this.speedX;
       this.y += this.speedY;
-      if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-      if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+      if (this.x < 0 || this.x > canvas.width) this.speedX = -this.speedX;
+      if (this.y < 0 || this.y > canvas.height) this.speedY = -this.speedY;
+    }
+    draw() {
+      ctx.fillStyle = 'rgba(0, 255, 229, 0.7)';
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
     }
   }
 
   function initParticles() {
     particles = [];
-    for (let i = 0; i < 150; i++) {
+    for (let i = 0; i < 100; i++) {
       particles.push(new Particle());
     }
   }
@@ -327,5 +342,7 @@
 
   initParticles();
   animateParticles();
-</script></body>
+
+</script>
+</body>
 </html>
