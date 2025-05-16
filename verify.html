@@ -83,29 +83,17 @@
   const params = new URLSearchParams(window.location.search);
   const url = params.get('url');
   const title = params.get('title');
+  const accessKey = `verified-${encodeURIComponent(url)}`;
 
-  const accessKey = `verified_until`;
-
-  // Check if access is still valid
-  const verifiedUntil = localStorage.getItem(accessKey);
-  if (verifiedUntil && Date.now() < Number(verifiedUntil)) {
-    // Skip verification if still valid
+  // Check if cookie exists
+  if (document.cookie.includes(`${accessKey}=true`)) {
     window.location.href = `https://brooov.netlify.app/access-granted.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title || "")}`;
   }
 
   async function generateAdLink() {
-    if (!url) {
-      alert("Missing target URL.");
-      return;
-    }
-
     const finalRedirect = `https://brooov.netlify.app/access-granted.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title || "")}`;
     const apiToken = '5fb415cd7e6b42fd8ba25416066c25f44c85587b';
     const shortUrlApi = `https://linkshortify.com/api?api=${apiToken}&url=${encodeURIComponent(finalRedirect)}`;
-
-    const btn = document.querySelector('.verify-btn');
-    btn.disabled = true;
-    btn.textContent = "Generating...";
 
     try {
       const res = await fetch(shortUrlApi);
@@ -113,21 +101,15 @@
 
       if (result.status === 'error') {
         alert(result.message);
-        btn.disabled = false;
-        btn.textContent = "Click Here To Verify Task";
       } else {
-        // Save 24-hour access
-        const oneDayLater = Date.now() + 24 * 60 * 60 * 1000;
-        localStorage.setItem(accessKey, oneDayLater.toString());
+        // Set 24-hour cookie
+        document.cookie = `${accessKey}=true; max-age=86400; path=/`;
         window.location.href = result.shortenedUrl;
       }
     } catch (error) {
-      console.error('LinkShortify Error:', error);
       alert('Failed to generate ad link.');
-      btn.disabled = false;
-      btn.textContent = "Click Here To Verify Task";
     }
   }
-</script>
+  </script>
 </body>
 </html>
