@@ -35,7 +35,8 @@
 
     // Get the redirect target from the query string
     const params = new URLSearchParams(window.location.search);
-    const target = params.get('url') || '/';
+    const rawTarget = params.get('url') || '/';
+const target = `/stream.html?url=${encodeURIComponent(rawTarget)}`;
 
     // Redirect after short delay
     setTimeout(() => {
