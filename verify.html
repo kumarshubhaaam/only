@@ -81,19 +81,16 @@
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const redirectTo = params.get('url') || params.get('redirect');
-    if (redirectTo) {
-      localStorage.setItem('postVerificationTarget', redirectTo);
-    }
+    const url = params.get('url');
+    const title = params.get('title');
 
     async function generateAdLink() {
-      const target = localStorage.getItem('postVerificationTarget') || '/';
-      const finalRedirectUrl = `https://brooov.netlify.app/access-granted.html?url=${encodeURIComponent(target)}`;
+      const finalRedirect = `https://brooov.netlify.app/access-granted.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title || "")}`;
+      const apiToken = '5fb415cd7e6b42fd8ba25416066c25f44c85587b';
+      const shortUrlApi = `https://linkshortify.com/api?api=${apiToken}&url=${encodeURIComponent(finalRedirect)}`;
 
       try {
-        const apiToken = '5fb415cd7e6b42fd8ba25416066c25f44c85587b';
-        const apiUrl = `https://linkshortify.com/api?api=${apiToken}&url=${encodeURIComponent(finalRedirectUrl)}`;
-        const res = await fetch(apiUrl);
+        const res = await fetch(shortUrlApi);
         const result = await res.json();
 
         if (result.status === 'error') {
