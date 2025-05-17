@@ -2,232 +2,347 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Streaming</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#1c1c1c">
+  <title>Stream</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    body {
+    * {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #000;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: #0a0a0a;
       color: white;
       overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    #particles-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      pointer-events: none;
     }
 
     header {
-      background: #111;
-      padding: 10px 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 2rem;
+      background-color: #1c1c1c;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 2.5rem;
       font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .highlight {
-      background: #ffcc00;
-      color: #000;
-      padding: 0 8px;
-      border-radius: 5px;
-      margin-left: 8px;
-    }
-
-    .back-button {
-      display: block;
-      margin: 20px auto 10px;
-      padding: 10px 25px;
-      font-size: 1rem;
-      background: #ff4d4d;
-      border: none;
+    .logo span:first-child {
       color: white;
-      border-radius: 25px;
-      cursor: pointer;
+    }
+
+    .logo span:last-child {
+      color: black;
+      background-color: #FFA500;
+      padding: 0 0.5rem;
+      border-radius: 0.4rem;
+      margin-left: 0.4rem;
     }
 
     .card {
-      max-width: 90%;
-      margin: 20px auto;
-      padding: 20px;
-      background: #111;
-      border: 2px solid cyan;
-      border-radius: 15px;
-      text-align: center;
-      box-shadow: 0 0 10px cyan;
+      background-color: #1c1c1c;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      border: 1.5px solid #00ffe5;
+      width: 90%;
+      max-width: 800px;
+      margin: 2rem auto;
+      box-shadow: 0 0 12px rgba(0, 255, 226, 0.2);
+      position: relative;
     }
 
-    iframe {
+    .iframe-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      border-radius: 0.5rem;
+    }
+
+    .iframe-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
-      height: 60vh;
+      height: 100%;
       border: none;
-      border-radius: 10px;
+      border-radius: 0.5rem;
     }
 
-    #loader {
-      display: inline-block;
-      margin-top: 15px;
-      border: 4px solid #00ffff;
-      border-top: 4px solid transparent;
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      background: rgba(255, 255, 255, 0.05);
       border-radius: 50%;
-      width: 30px;
-      height: 30px;
+      margin: 0 auto 1rem;
+      width: 80px;
+      height: 80px;
+    }
+
+    .spinner {
+      border: 6px solid rgba(255, 255, 255, 0.1);
+      border-top: 6px solid #00ffe5;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
       animation: spin 1s linear infinite;
     }
 
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      to { transform: rotate(360deg); }
     }
 
-    footer {
+    .title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin: 1rem 0;
       text-align: center;
-      margin-top: 40px;
+    }
+
+    .back-btn, .close-btn {
+      position: absolute;
+      top: 10px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
       font-size: 0.9rem;
-      opacity: 0.7;
-    }
-
-    #particles-js {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 100%;
-      z-index: -1;
-    }
-
-    #videoTitle {
-      font-size: 1.2rem;
-      margin-bottom: 10px;
       font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .back-btn {
+      left: 10px;
+      background: #00aaff;
+      color: white;
+    }
+
+    .back-btn:hover {
+      background: #0088cc;
+    }
+
+    .close-btn {
+      right: 10px;
+      background: #ff4c4c;
+      color: white;
+    }
+
+    .close-btn:hover {
+      background: #ff1a1a;
+    }
+
+    .footer {
+      text-align: center;
+      color: #aaa;
+      margin: 4rem 1rem 2rem;
+      font-size: 0.9rem;
+    }
+    .button-wrapper {
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .back-home-btn {
+      background: #ff4c4c;
+      color: white;
+      padding: 10px 24px;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: bold;
+      text-decoration: none;
+      box-shadow: 0 0 10px rgba(255, 76, 76, 0.5);
+      transition: background 0.3s ease;
+    }
+
+    .back-home-btn:hover {
+      background: #e60000;
+    }
+
+    .verify-lock {
+      text-align: center;
+      margin: 2rem auto;
+      padding: 2rem;
+      max-width: 700px;
+      background: #1a1a1a;
+      border: 2px dashed #00ffe5;
+      border-radius: 1rem;
+    }
+    .verify-btn {
+      background: linear-gradient(to right, #ff6a00, #ff9472);
+      padding: 12px 24px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 2rem;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 1rem;
+    }
+    .verify-btn:hover {
+      background: linear-gradient(to right, #ff8c42, #ffa87d);
     }
   </style>
 </head>
 <body>
-  <div id="particles-js"></div>
+<canvas id="particles-bg"></canvas>
+<header>
+  <div class="logo"><span>ONLY</span> <span>FANS</span></div>
+</header>
+<br>
+<div class="button-wrapper">
+  <a href="index.html" class="back-home-btn">Back</a>
+</div>
 
-  <header>
-    ONLY <span class="highlight">FANS</span>
-  </header>
+<div id="verificationLock" class="verify-lock" style="display: none;">
+  <h2>Verification Required</h2>
+  <p>Please verify once to unlock access to all videos for the next 24 hours.</p>
+  <button class="verify-btn" onclick="startVerification()">Verify Now</button>
+</div>
 
-  <button class="back-button" onclick="window.history.back()">Back</button>
-
-  <div class="card">
-    <div id="videoTitle">Streaming...</div>
-    <iframe id="videoPlayer" allowfullscreen style="display:none;"></iframe>
-    <div id="loader"></div>
-    <p id="errorMsg" style="margin-top: 10px;"></p>
+<div class="card" id="streamCard" style="display: none;">
+  <div class="title" id="videoTitle">Streaming...</div>
+  <div id="loader" class="loading"><div class="spinner"></div></div>
+  <div class="iframe-container" id="videoContainer" style="display: none;">
+    <iframe id="videoPlayer" allowfullscreen></iframe>
   </div>
+</div>
 
-  <footer>
-    © 2025 ONLY FANS. All rights reserved.
-  </footer>
+<div class="footer">
+  &copy; 2025 ONLY FANS. All rights reserved.
+</div>
 
-  <!-- Particles.js -->
-  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-  <script>
-    particlesJS('particles-js', {
-      particles: {
-        number: { value: 60 },
-        color: { value: '#00ffff' },
-        shape: { type: 'circle' },
-        opacity: { value: 0.7 },
-        size: { value: 3 },
-        line_linked: { enable: false },
-        move: { enable: true, speed: 2 }
-      },
-      interactivity: {
-        detect_on: 'canvas',
-        events: {
-          onhover: { enable: false },
-          onclick: { enable: false }
-        }
-      },
-      retina_detect: true
-    });
-  </script>
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const streamUrl = urlParams.get('url');
+  const title = urlParams.get('title') || "Streaming...";
 
-  <!-- Load video -->
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const url = params.get("url");
-    const title = params.get("title");
-
-    const player = document.getElementById("videoPlayer");
-    const loader = document.getElementById("loader");
-    const errorMsg = document.getElementById("errorMsg");
-    const videoTitle = document.getElementById("videoTitle");
-
-    if (title) videoTitle.textContent = title;
-    if (url) {
-      player.src = url;
-      player.onload = () => {
-        loader.style.display = "none";
-        player.style.display = "block";
-      };
-    } else {
-      errorMsg.textContent = "No video URL provided.";
-      loader.style.display = "none";
-    }
-const token = new URLSearchParams(window.location.search).get("token");
-const streamUrl = new URLSearchParams(window.location.search).get("url");
-const title = new URLSearchParams(window.location.search).get("title") || "Streaming...";
-const sheetAPI = "https://sheetdb.io/api/v1/oycvzv2lfolhk";
-
-const streamCard = document.getElementById("streamCard");
-const verificationLock = document.getElementById("verificationLock");
-
-async function checkToken() {
-  if (!token) {
-    verificationLock.style.display = "block";
-    return;
-  }
-
-  const res = await fetch(`${sheetAPI}/search?token=${token}`);
-  const data = await res.json();
-
-  if (data.length === 0) {
-    verificationLock.style.display = "block";
-    return;
-  }
-
-  const record = data[0];
-  const expiry = parseInt(record.expiry || 0);
+  // Check verification time (24 hours)
+  const verifiedUntil = parseInt(localStorage.getItem('verifiedUntil') || '0', 10);
   const now = Date.now();
 
-  if (record.used === "true" || now > expiry) {
+  const streamCard = document.getElementById("streamCard");
+  const verificationLock = document.getElementById("verificationLock");
+
+  if (verifiedUntil > now) {
+    // Verified and still valid
+    showStream();
+  } else {
+    // Not verified or expired
     verificationLock.style.display = "block";
-    return;
   }
 
-  // Mark token as used
-  await fetch(`${sheetAPI}/token/${record.token}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ used: "true" })
-  });
+  function showStream() {
+    verificationLock.style.display = "none";
+    streamCard.style.display = "block";
+    document.getElementById("videoTitle").innerText = decodeURIComponent(title);
 
-  localStorage.setItem("verifiedUntil", expiry.toString());
-  showStream();
-}
+    if (!streamUrl) {
+      document.getElementById('loader').innerText = "No video URL provided.";
+      return;
+    }
 
-function showStream() {
-  verificationLock.style.display = "none";
-  streamCard.style.display = "block";
-  document.getElementById("videoTitle").innerText = decodeURIComponent(title);
+    const iframe = document.getElementById('videoPlayer');
+    iframe.src = streamUrl;
 
-  if (!streamUrl) {
-    document.getElementById('loader').innerText = "No video URL provided.";
-    return;
+    iframe.onload = () => {
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('videoContainer').style.display = 'block';
+    };
   }
 
-  const iframe = document.getElementById('videoPlayer');
-  iframe.src = streamUrl;
+  function startVerification() {
+    // Generate shortlink to redirect user to verify.html with current page as redirect url
+    const currentUrl = encodeURIComponent(window.location.href);
+    const apiToken = '5fb415cd7e6b42fd8ba25416066c25f44c85587b';
+    const apiUrl = `https://linkshortify.com/api?api=${apiToken}&url=${currentUrl}`;
 
-  iframe.onload = () => {
-    document.getElementById('loader').style.display = 'none';
-    document.getElementById('videoContainer').style.display = 'block';
-  };
-}
+    fetch(apiUrl)
+      .then(res => res.json())
+      .then(result => {
+        if (result.status === 'error') {
+          alert(result.message);
+          return;
+        }
+        window.location.href = result.shortenedUrl;
+      })
+      .catch(() => alert("Failed to generate ad link."));
+  }
 
-checkToken();
-  </script>
+  // Particle background animation
+
+  const canvas = document.getElementById('particles-bg');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  class Particle {
+    constructor() {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+      this.size = Math.random() * 2 + 1;
+      this.speedX = Math.random() * 1 - 0.5;
+      this.speedY = Math.random() * 1 - 0.5;
+    }
+    update() {
+      this.x += this.speedX;
+      this.y += this.speedY;
+      if (this.x < 0 || this.x > canvas.width) this.speedX = -this.speedX;
+      if (this.y < 0 || this.y > canvas.height) this.speedY = -this.speedY;
+    }
+    draw() {
+      ctx.fillStyle = 'rgba(0, 255, 229, 0.7)';
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function initParticles() {
+    particles = [];
+    for (let i = 0; i < 100; i++) {
+      particles.push(new Particle());
+    }
+  }
+
+  function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.update();
+      p.draw();
+    });
+    requestAnimationFrame(animateParticles);
+  }
+
+  initParticles();
+  animateParticles();
+
+</script>
 </body>
 </html>
