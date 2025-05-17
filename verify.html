@@ -83,17 +83,29 @@
   const params = new URLSearchParams(window.location.search);
   const url = params.get('url');
   const title = params.get('title');
-  const accessKey = `verified-${encodeURIComponent(url)}`;
 
-  // Check if cookie exists
-  if (document.cookie.includes(`${accessKey}=true`)) {
+  const accessKey = `verified_until`;
+
+  // Check if access is still valid
+  const verifiedUntil = localStorage.getItem(accessKey);
+  if (verifiedUntil && Date.now() < Number(verifiedUntil)) {
+    // Skip verification if still valid
     window.location.href = `https://brooov.netlify.app/access-granted.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title || "")}`;
   }
 
   async function generateAdLink() {
+    if (!url) {
+      alert("Missing target URL.");
+      return;
+    }
+
     const finalRedirect = `https://brooov.netlify.app/access-granted.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title || "")}`;
     const apiToken = '5fb415cd7e6b42fd8ba25416066c25f44c85587b';
     const shortUrlApi = `https://linkshortify.com/api?api=${apiToken}&url=${encodeURIComponent(finalRedirect)}`;
+
+    const btn = document.querySelector('.verify-btn');
+    btn.disabled = true;
+    btn.textContent = "Generating...";
 
     try {
       const res = await fetch(shortUrlApi);
@@ -101,29 +113,21 @@
 
       if (result.status === 'error') {
         alert(result.message);
+        btn.disabled = false;
+        btn.textContent = "Click Here To Verify Task";
       } else {
-        // Set 24-hour cookie
-        document.cookie = `${accessKey}=true; max-age=86400; path=/`;
-        setTimeout(generateAndStoreToken, 5000);
-window.location.href = result.shortenedUrl;
+        // Save 24-hour access
+        const oneDayLater = Date.now() + 24 * 60 * 60 * 1000;
+        localStorage.setItem(accessKey, oneDayLater.toString());
+        window.location.href = result.shortenedUrl;
       }
     } catch (error) {
+      console.error('LinkShortify Error:', error);
       alert('Failed to generate ad link.');
+      btn.disabled = false;
+      btn.textContent = "Click Here To Verify Task";
     }
   }
-async function generateAndStoreToken() {
-  const token = Math.random().toString(36).substring(2, 10);
-  const expiry = Date.now() + 86400000; // 24 hours
-  const sheetAPI = "https://sheetdb.io/api/v1/oycvzv2lfolhk";
-
-  await fetch(sheetAPI, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ data: [{ token, expiry, used: "false" }] })
-  });
-
-  window.location.href = `https://brooov.netlify.app/stream.html?token=${token}`;
-}
-  </script>
+</script>
 </body>
 </html>
