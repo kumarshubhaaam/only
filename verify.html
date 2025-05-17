@@ -104,12 +104,26 @@
       } else {
         // Set 24-hour cookie
         document.cookie = `${accessKey}=true; max-age=86400; path=/`;
-        window.location.href = result.shortenedUrl;
+        setTimeout(generateAndStoreToken, 5000);
+window.location.href = result.shortenedUrl;
       }
     } catch (error) {
       alert('Failed to generate ad link.');
     }
   }
+async function generateAndStoreToken() {
+  const token = Math.random().toString(36).substring(2, 10);
+  const expiry = Date.now() + 86400000; // 24 hours
+  const sheetAPI = "https://sheetdb.io/api/v1/oycvzv2lfolhk";
+
+  await fetch(sheetAPI, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ data: [{ token, expiry, used: "false" }] })
+  });
+
+  window.location.href = `https://brooov.netlify.app/stream.html?token=${token}`;
+}
   </script>
 </body>
 </html>
