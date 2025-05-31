@@ -10,7 +10,6 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-NL42K9HXB6');
   </script>
   
@@ -49,12 +48,12 @@
   <p>Redirecting to your stream content...</p>
 
   <script>
-    // Save 24-hour access flag
-    const expiresAt = Date.now() + (24 * 60 * 60 * 1000);
+    // Save 5-minute access flag
+    const expiresAt = Date.now() + (5 * 60 * 1000); // 5 minutes
     localStorage.setItem('verifiedUntil', expiresAt);
 
-    // ✅ Also set a cookie for 24-hour access
-    document.cookie = "verified_access=true; max-age=86400; path=/";
+    // Also set a cookie for 5-minute access
+    document.cookie = "verified_access=true; max-age=300; path=/";
 
     // Get URL and title from query params
     const params = new URLSearchParams(window.location.search);
