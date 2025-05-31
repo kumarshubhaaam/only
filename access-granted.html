@@ -53,8 +53,7 @@
     localStorage.setItem('verifiedUntil', expiresAt);
 
     // Also set a cookie for 5-minute access
-    document.cookie = "verified_access=true; max-age=300; path=/";
-
+    document.cookie = "verified_access=true; max-age=86400; path=/";
     // Get URL and title from query params
     const params = new URLSearchParams(window.location.search);
     const rawUrl = params.get('url') || '';
