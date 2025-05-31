@@ -68,18 +68,11 @@
       padding: 1rem;
       border-radius: 0.75rem;
       text-align: center;
-      transition: transform 0.4s ease, box-shadow 0.4s ease, opacity 0.4s;
       border: 2px solid transparent;
-      opacity: 0;
-      transform: scale(0.9);
-      pointer-events: none;
-      user-select: none;
-    }
-
-    .card.visible {
       opacity: 1;
       transform: scale(1);
       pointer-events: auto;
+      user-select: none;
     }
 
     .card:hover {
@@ -91,7 +84,7 @@
     .card img {
       width: 100%;
       height: 180px;
-      object-fit: fill;
+      object-fit: cover;
       border-radius: 0.5rem;
       margin-bottom: 1rem;
       pointer-events: none;
@@ -213,7 +206,15 @@
     return v ? v[2] : null;
   }
 
-  showSkeletons();
+  const skeletonKey = 'skeletonLastShown';
+  const now = Date.now();
+  const lastShown = localStorage.getItem(skeletonKey);
+  const showSkeleton = !lastShown || now - parseInt(lastShown) > 86400000;
+
+  if (showSkeleton) {
+    showSkeletons();
+    localStorage.setItem(skeletonKey, now.toString());
+  }
 
   fetch(url)
     .then(res => res.text())
@@ -226,11 +227,17 @@
         imageUrl: row.c[1]?.v || '',
         watchUrl: row.c[2]?.v || '#'
       }));
-      setTimeout(() => {
+      if (showSkeleton) {
+        setTimeout(() => {
+          removeSkeletons();
+          renderPagination();
+          renderPosts(1);
+        }, 3000);
+      } else {
         removeSkeletons();
         renderPagination();
         renderPosts(1);
-      }, 3000);
+      }
     });
 
   function showSkeletons() {
@@ -260,20 +267,17 @@
 
     pagePosts.forEach(post => {
       const card = document.createElement('div');
-      card.className = 'card visible';
+      card.className = 'card';
       card.setAttribute('data-post-id', post.id);
       card.innerHTML = `
-        <img src="${post.imageUrl}" alt="${post.title}" oncontextmenu="return false;" draggable="false"/>
+        <img src="${post.imageUrl}" alt="${post.title}" oncontextmenu="return false;" draggable="false" loading="lazy" decoding="async" width="100%" height="180" fetchpriority="low"/>
         <h3>${post.title}</h3>
         <button onclick="handleWatchClick('${encodeURIComponent(post.watchUrl)}', '${encodeURIComponent(post.title)}')">Watch</button>
       `;
       grid.appendChild(card);
     });
-
-    updateCardVisibility();
   }
 
-  // Updated handleWatchClick with title
   function handleWatchClick(encodedUrl, encodedTitle) {
     const verified = getCookie('verified_access');
     if (verified === 'true') {
@@ -355,28 +359,6 @@
 
   initParticles();
   animateParticles();
-
-  function updateCardVisibility() {
-    const cards = document.querySelectorAll('.card');
-    const triggerMiddle = window.innerHeight / 1.5;
-
-    cards.forEach(card => {
-      const rect = card.getBoundingClientRect();
-      if (rect.top < window.innerHeight && rect.bottom > 0) {
-        if (rect.top < triggerMiddle && rect.bottom > window.innerHeight - triggerMiddle) {
-          card.classList.add('visible');
-        } else {
-          card.classList.remove('visible');
-        }
-      } else {
-        card.classList.remove('visible');
-      }
-    });
-  }
-
-  window.addEventListener('scroll', updateCardVisibility);
-  window.addEventListener('resize', updateCardVisibility);
-  updateCardVisibility();
 </script>
 </body>
 </html>
