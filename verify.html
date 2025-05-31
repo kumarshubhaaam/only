@@ -25,7 +25,20 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      position: relative;
+      overflow: hidden;
     }
+
+    #particles-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      pointer-events: none;
+    }
+
     .card {
       background: linear-gradient(145deg, #1e1e1e, #111);
       border-radius: 20px;
@@ -34,6 +47,7 @@
       max-width: 400px;
       width: 90%;
       text-align: center;
+      z-index: 1;
     }
     h2 {
       font-size: 1.5em;
@@ -73,6 +87,8 @@
   </style>
 </head>
 <body>
+  <canvas id="particles-bg"></canvas>
+
   <div class="card">
     <h2>⚡ Must Watch Tutorial ⚡</h2>
     <iframe height="215" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>
@@ -90,49 +106,105 @@
   </div>
 
   <script>
-const params = new URLSearchParams(window.location.search);
-const url = params.get('url');
-const title = params.get('title');
+    const params = new URLSearchParams(window.location.search);
+    const url = params.get('url');
+    const title = params.get('title');
 
-const accessKey = `verified_until`;
+    const accessKey = `verified_until`;
 
-const verifiedUntil = localStorage.getItem(accessKey);
-if (verifiedUntil && Date.now() < Number(verifiedUntil)) {
-  window.location.href = `https://brooov.netlify.app/access-granted.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title || "")}`;
-}
-
-async function generateAdLink() {
-  if (!url) {
-    alert("Missing target URL.");
-    return;
-  }
-
-  const finalRedirect = `https://brooov.netlify.app/access-granted.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title || "")}`;
-  const apiToken = '5fb415cd7e6b42fd8ba25416066c25f44c85587b';
-  const shortUrlApi = `https://linkshortify.com/api?api=${apiToken}&url=${encodeURIComponent(finalRedirect)}`;
-
-  const btn = document.querySelector('.verify-btn');
-  btn.disabled = true;
-  btn.textContent = "Generating...";
-
-  try {
-    const res = await fetch(shortUrlApi);
-    const result = await res.json();
-
-    if (result.status === 'error') {
-      alert(result.message);
-      btn.disabled = false;
-      btn.textContent = "Click Here To Verify Task";
-    } else {
-      window.location.href = result.shortenedUrl;
+    const verifiedUntil = localStorage.getItem(accessKey);
+    if (verifiedUntil && Date.now() < Number(verifiedUntil)) {
+      window.location.href = `https://brooov.netlify.app/access-granted.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title || "")}`;
     }
-  } catch (error) {
-    console.error('LinkShortify Error:', error);
-    alert('❌ Failed to generate ad link. Please try using Chrome or disable adblock in this browser.');
-    btn.disabled = false;
-    btn.textContent = "Click Here To Verify Task";
-  }
-}
+
+    async function generateAdLink() {
+      if (!url) {
+        alert("Missing target URL.");
+        return;
+      }
+
+      const finalRedirect = `https://brooov.netlify.app/access-granted.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title || "")}`;
+      const apiToken = '5fb415cd7e6b42fd8ba25416066c25f44c85587b';
+      const shortUrlApi = `https://linkshortify.com/api?api=${apiToken}&url=${encodeURIComponent(finalRedirect)}`;
+
+      const btn = document.querySelector('.verify-btn');
+      btn.disabled = true;
+      btn.textContent = "Generating...";
+
+      try {
+        const res = await fetch(shortUrlApi);
+        const result = await res.json();
+
+        if (result.status === 'error') {
+          alert(result.message);
+          btn.disabled = false;
+          btn.textContent = "Click Here To Verify Task";
+        } else {
+          window.location.href = result.shortenedUrl;
+        }
+      } catch (error) {
+        console.error('LinkShortify Error:', error);
+        alert('❌ Failed to generate ad link. Please try using Chrome or disable adblock in this browser.');
+        btn.disabled = false;
+        btn.textContent = "Click Here To Verify Task";
+      }
+    }
+
+    // Particle background script
+    const canvas = document.getElementById('particles-bg');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.radius = Math.random() * 2;
+        this.speedX = (Math.random() - 0.5) * 0.7;
+        this.speedY = (Math.random() - 0.5) * 0.7;
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+      }
+
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+      }
+    }
+
+    function initParticles() {
+      particles = [];
+      for (let i = 0; i < 150; i++) {
+        particles.push(new Particle());
+      }
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+
+    initParticles();
+    animateParticles();
   </script>
 </body>
 </html>
