@@ -49,7 +49,7 @@
 
   <script>
     // Save 5-minute access flag
-    const expiresAt = Date.now() + (5 * 60 * 1000); // 5 minutes
+    const expiresAt = Date.now() + (24 * 60 * 60 * 1000);
     localStorage.setItem('verifiedUntil', expiresAt);
 
     // Also set a cookie for 5-minute access
