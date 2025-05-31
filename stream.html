@@ -13,7 +13,6 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-NL42K9HXB6');
   </script>
 
@@ -42,33 +41,7 @@
       pointer-events: none;
     }
 
-    header {
-      background-color: #1c1c1c;
-      padding: 1.5rem;
-      text-align: center;
-    }
-
-    .logo {
-      font-size: 2.5rem;
-      font-weight: bold;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .logo span:first-child {
-      color: white;
-    }
-
-    .logo span:last-child {
-      color: black;
-      background-color: #FFA500;
-      padding: 0 0.5rem;
-      border-radius: 0.4rem;
-      margin-left: 0.4rem;
-    }
-
-    .card {
+  .card {
       background-color: #1c1c1c;
       padding: 1rem;
       border-radius: 0.75rem;
@@ -168,6 +141,7 @@
       margin: 4rem 1rem 2rem;
       font-size: 0.9rem;
     }
+
     .button-wrapper {
       text-align: center;
       margin-top: 1rem;
@@ -199,6 +173,7 @@
       border: 2px dashed #00ffe5;
       border-radius: 1rem;
     }
+
     .verify-btn {
       background: linear-gradient(to right, #ff6a00, #ff9472);
       padding: 12px 24px;
@@ -210,6 +185,7 @@
       font-weight: bold;
       margin-top: 1rem;
     }
+
     .verify-btn:hover {
       background: linear-gradient(to right, #ff8c42, #ffa87d);
     }
@@ -217,9 +193,9 @@
 </head>
 <body>
 <canvas id="particles-bg"></canvas>
-<header>
-  <div class="logo"><span>ONLY</span> <span>FANS</span></div>
-</header>
+<br>
+<br>
+<br>
 <br>
 <div class="button-wrapper">
   <a href="index.html" class="back-home-btn">Back</a>
@@ -239,16 +215,11 @@
   </div>
 </div>
 
-<div class="footer">
-  &copy; 2025 ONLY FANS. All rights reserved.
-</div>
-
 <script>
   const urlParams = new URLSearchParams(window.location.search);
   const streamUrl = urlParams.get('url');
   const title = urlParams.get('title') || "Streaming...";
 
-  // Check verification time (24 hours)
   const verifiedUntil = parseInt(localStorage.getItem('verifiedUntil') || '0', 10);
   const now = Date.now();
 
@@ -256,10 +227,8 @@
   const verificationLock = document.getElementById("verificationLock");
 
   if (verifiedUntil > now) {
-    // Verified and still valid
     showStream();
   } else {
-    // Not verified or expired
     verificationLock.style.display = "block";
   }
 
@@ -283,7 +252,6 @@
   }
 
   function startVerification() {
-    // Generate shortlink to redirect user to verify.html with current page as redirect url
     const currentUrl = encodeURIComponent(window.location.href);
     const apiToken = '5fb415cd7e6b42fd8ba25416066c25f44c85587b';
     const apiUrl = `https://linkshortify.com/api?api=${apiToken}&url=${currentUrl}`;
@@ -300,8 +268,7 @@
       .catch(() => alert("Failed to generate ad link."));
   }
 
-  // Particle background animation
-
+  // Replaced particle animation with white particles (verify-style)
   const canvas = document.getElementById('particles-bg');
   const ctx = canvas.getContext('2d');
   let particles = [];
@@ -310,6 +277,7 @@
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
   }
+
   window.addEventListener('resize', resize);
   resize();
 
@@ -317,27 +285,29 @@
     constructor() {
       this.x = Math.random() * canvas.width;
       this.y = Math.random() * canvas.height;
-      this.size = Math.random() * 2 + 1;
-      this.speedX = Math.random() * 1 - 0.5;
-      this.speedY = Math.random() * 1 - 0.5;
+      this.radius = Math.random() * 2;
+      this.speedX = (Math.random() - 0.5) * 0.7;
+      this.speedY = (Math.random() - 0.5) * 0.7;
     }
+
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+    }
+
     update() {
       this.x += this.speedX;
       this.y += this.speedY;
-      if (this.x < 0 || this.x > canvas.width) this.speedX = -this.speedX;
-      if (this.y < 0 || this.y > canvas.height) this.speedY = -this.speedY;
-    }
-    draw() {
-      ctx.fillStyle = 'rgba(0, 255, 229, 0.7)';
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-      ctx.fill();
+      if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+      if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
     }
   }
 
   function initParticles() {
     particles = [];
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 150; i++) {
       particles.push(new Particle());
     }
   }
@@ -353,7 +323,6 @@
 
   initParticles();
   animateParticles();
-
 </script>
 </body>
 </html>
