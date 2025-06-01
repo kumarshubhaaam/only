@@ -7,15 +7,6 @@
   <title>Stream</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-NL42K9HXB6"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-NL42K9HXB6');
-  </script>
-
   <style>
     * {
       margin: 0;
@@ -220,17 +211,20 @@
   const streamUrl = urlParams.get('url');
   const title = urlParams.get('title') || "Streaming...";
 
+  function isVerified() {
+  const verifiedCookie = document.cookie.includes("verified_access=true");
   const verifiedUntil = parseInt(localStorage.getItem('verifiedUntil') || '0', 10);
-  const now = Date.now();
+  return verifiedCookie && verifiedUntil > Date.now();
+}
 
-  const streamCard = document.getElementById("streamCard");
-  const verificationLock = document.getElementById("verificationLock");
+const streamCard = document.getElementById("streamCard");
+const verificationLock = document.getElementById("verificationLock");
 
-  if (verifiedUntil > now) {
-    showStream();
-  } else {
-    verificationLock.style.display = "block";
-  }
+if (isVerified()) {
+  showStream();
+} else {
+  verificationLock.style.display = "block";
+}
 
   function showStream() {
     verificationLock.style.display = "none";
